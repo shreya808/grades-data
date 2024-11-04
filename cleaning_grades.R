@@ -131,12 +131,6 @@ grade_percentage_academic_year <- cleaned_course_grades %>%
 
 # Make separate table with course code, division, department, and full course name
 
-# list of UCSB colleges
-college <- c("College of Letters & Science", "College of Engineering",
-             "College of Creative Studies",
-             "Gervitz Graduate School of Education",
-             "Bren School of Environmental Science & Management")
-
 course_info <- cleaned_course_grades %>%
   select(course, dept, course_level) %>% 
   distinct() %>% 
@@ -162,6 +156,12 @@ course_info <- cleaned_course_grades %>%
     # str_detect is finding dept where there is a space before "CS"; or dept is CMPSCCS or CMPTGCS or W&L (writing and literature)
     str_detect(dept, "\\sCS") | dept == "CMPSCCS" | dept == "CMPTGCS" | dept == "W&L" ~ "Creative Studies",
     # division for education or CNSCP will be "Graduate" because it is in the Gervitz Graduate School of Education
-    dept %in% c("ED", "CNCSP") ~ "Graduate"))
+    dept %in% c("ED", "CNCSP") ~ "Graduate")) %>% 
+  mutate(college = case_when(
+    division == "Humanities and Fine Arts" ~ "College of Letters & Science",
+    division == "Social Sciences" ~ "College of Letters & Science",
+    division == "Mathematical, Life, and Physical Sciences" ~ "College of Letters & Science",
+    division == "Engineering" ~ "College of Engineering",
+    division == "Creative Studies" ~ "College of Creative Studies",
+    division == "Graduate" ~ "Gervitz Graduate School of Education"))
 
-course_info$dept[is.na(course_info$division)==TRUE]
