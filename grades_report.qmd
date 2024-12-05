@@ -1,6 +1,20 @@
-# Shreya Sinha
-# 12/3/2024
+---
+title: "Analysis of UCSB Undergraduate Grade Trends"
+author: "Shreya Sinha" # <- add your name here
+date: "`r Sys.Date()`"
+params: 
+  showCode: FALSE
+execute: 
+  warning: FALSE # <- this makes sure your code chunks are evaluated
+  message: FALSE
+format:
+  html:
+    fontsize: 1.1rem
+fig-cap-location: top
+output: pdf_document
+---
 
+```{r setup, include = FALSE}
 rm(list = ls())
 library(tidyverse)
 library(janitor)
@@ -8,6 +22,20 @@ library(lubridate)
 library(gt)
 library(grid)
 library(data.table)
+
+```
+
+### Data
+
+UC Santa Barbara students’ grade data from Fall 2009 to Spring 2024 were obtained through Public Records Act requests facilitated by the Daily Nexus. The dataset includes detailed information on course grades across various departments and academic levels, encompassing both graduate and undergraduate courses. It provides a breakdown of letter grades, Pass/No Pass enrollments, and other grade-related metrics.
+
+### Findings
+
+Figure 1 shows the average GPA for undergraduate courses across the College of Engineering, College of Letters & Science, Gervitz School of Education, and the three divisions within Letters & Science, spanning the 2009-2010 to 2023-2024 academic years (excluding Summer 2024). Over this period, a general upward trend in average GPA is evident across all colleges and divisions, with the most significant increases observed in the Humanities & Fine Arts division of Letters & Science and the Gervitz School of Education. In the 2021-2022 academic year, all divisions and colleges, except for Humanities & Fine Arts and the Gervitz School of Education, experienced a marked decline in average GPA.
+
+Figure 2 complements this analysis by showing the percentage of A's awarded in undergraduate courses across the same colleges and divisions over the same period. This percentage includes A plus and minus grades and mirrors the overall trend in average GPA. The most notable increase in the percentage of A's is in the Mathematical, Life, & Physical Sciences division of Letters & Science, which has approximately doubled since the 2009-2010 academic year.
+
+```{r echo = FALSE, message=FALSE, warning=FALSE}
 
 course_grades <- read_csv("courseGrades.csv")
 
@@ -144,7 +172,7 @@ course_info <- cleaned_course_grades %>%
   select(course, dept, course_level) %>% 
   distinct() %>% 
   mutate(division = case_when(
-    # humanities & fine arts departments from https://www.hfa.ucsb.edu/academics/#majors-section
+    # humanities & Fine arts departments from https://www.hfa.ucsb.edu/academics/#majors-section
     dept %in% c("ART", "ARTST", "CLASS", "C LIT", "EACS", "KOR", "JAPAN", "CHIN",
                 "ENGL", "FAMST","FLMST", "ITAL", "FR", "FRIT", "GER", "SLAV", "RUSS", "HIST",
                 "ARTHI", "LAIS", "LING", "LATIN","GREEK", "MUS", "MUS A", "PHIL", "RG ST", "HEB", "MES", "PORT", 
@@ -239,48 +267,68 @@ college_division_gpa_plot <- college_division_statistics %>%
   geom_point(aes(y = college_GPA, colour = college), size = 1)+
   geom_line(aes(y = division_GPA, colour = division), linewidth = .6)+
   geom_point(aes(y = division_GPA, colour = division), size = 1)+
-  labs(title = "Figure 1: Average GPA Over Time for UCSB Colleges and Divisions",
-       x = "Academic Year",
+  labs(x = "Academic Year",
        y = "Grade Point Average (GPA)",
        colour = "College/Division")+
   theme_minimal()+
-  theme(axis.text=element_text(size=12), #change font size of axis text
-        axis.title=element_text(size=15), #change font size of axis titles
-        plot.title=element_text(size=20), #change font size of plot title
-        legend.text=element_text(size=12), #change font size of legend text
-        legend.title=element_text(size=15),#change font size of legend title   
+  theme(axis.text=element_text(size=9), #change font size of axis text
+        axis.title=element_text(size=11), #change font size of axis titles
+        legend.text=element_text(size=11), #change font size of legend text
+        legend.title=element_text(size=11),#change font size of legend title   
         axis.text.x = element_text(angle = 60))+
   guides(colour = guide_legend(override.aes = list(linewidth = 2)))
 
 
-print(college_division_gpa_plot)
-ggsave('college_division_gpa_plot.png')
+#print(college_division_gpa_plot)
+#ggsave('college_division_gpa_plot.png')
 
 college_division_A_plot <- college_division_statistics %>% 
   filter(!is.na(college) & !is.na(division),
          division != "College of Creative Studies",
          division != "Interdisciplinary") %>% 
   ggplot(aes(x = academic_year, group = division))+
-  geom_line(aes(y = college_percent_A, colour = college), linewidth = .6)+
+  geom_line(aes(y = college_percent_A, colour = college), size = .6)+
   geom_point(aes(y = college_percent_A, colour = college), size = 1)+
-  geom_line(aes(y = division_percent_A, colour = division), linewidth = .6)+
+  geom_line(aes(y = division_percent_A, colour = division), size = .6)+
   geom_point(aes(y = division_percent_A, colour = division), size = 1)+
-  labs(title = "Figure 2: Percentage of A's Over Time for UCSB Colleges and Divisions",
-       x = "Academic Year",
+  labs(x = "Academic Year",
        y = "Percentage of A's (%)",
        colour = "College/Division") +
   theme_minimal()+
-  theme(axis.text=element_text(size=12), #change font size of axis text
-        axis.title=element_text(size=15), #change font size of axis titles
-        plot.title=element_text(size=20), #change font size of plot title
-        legend.text=element_text(size=12), #change font size of legend text
-        legend.title=element_text(size=15),#change font size of legend title   
-        axis.text.x = element_text(angle = 60))+
+  theme(axis.text=element_text(size=9), #change font size of axis text
+        axis.title=element_text(size=11), #change font size of axis titles
+        legend.text=element_text(size=11), #change font size of legend text
+        legend.title=element_text(size=11),#change font size of legend title   
+        axis.text.x = element_text(angle = 55))+
   guides(colour = guide_legend(override.aes = list(linewidth = 2)))
-print(college_division_A_plot)
+```
 
-ggsave('college_division_A_plot.png')
+```{r, echo = FALSE, fig.width=9, fig.height=4}
+#| fig-cap: "Figure 1: Average GPA Over Time for UCSB Colleges and Divisions"
 
+college_division_gpa_plot
+```
+
+\newpage
+
+```{r, echo = FALSE, fig.width=9, fig.height=4}
+#| fig-cap: "Figure 2: Percentage of A's Over Time for UCSB Colleges and Divisions"
+
+college_division_A_plot
+```
+
+The percentage of A grades awarded in undergraduate courses in the 2023-2024 academic year for each department is presented on the last page.
+
+### Methods
+
+Each department in the dataset was manually categorized into its respective division and college, as this information was not available in the original dataset. The division and college assignments were based on existing academic classifications at UC Santa Barbara, with departments categorized according to their field of study. This categorization was essential for the subsequent analysis of grading trends across different academic units. To facilitate analysis of undergraduate course grades, courses with course numbers 200 or higher were excluded to remove graduate-level courses.
+
+To analyze grade trends across colleges and academic divisions, data was aggregated in two stages: first at the course level and then at the college and division levels. For courses taught by multiple instructors or offered across multiple quarters within an academic year, the course-level average GPA was calculated as a weighted mean, with weights based on the total number of students enrolled in each course. Additionally, the total enrollment and the total number of A's (including plus and minus grades) for each course were summed across all quarters in the academic year.
+
+Using these course-level metrics, data was then aggregated at the college and division levels for each academic year. For both colleges and divisions, the average GPA was calculated as a weighted mean of the course-level GPAs, with weights derived from yearly course enrollments. The total enrollment for each college and division was determined by summing the enrollments of all courses within the respective grouping. The percentage of A grades awarded was calculated by dividing the total number of A grades by the total enrollment for each college or division. This approach ensured a consistent methodology for examining grading patterns while accounting for variability in course sizes, grading distributions, and enrollment trends across academic groupings. \newpage
+
+```{r echo = FALSE, message=FALSE, warning=FALSE}
+#ggsave('college_division_A_plot.png')
 #percent of A's for each department in the most recent year
 percent_23_24 <- course_grade_info %>%
   filter(academic_year == "2023-2024" & division != "College Creative Studies"
@@ -353,7 +401,6 @@ percent_23_24 <- course_grade_info %>%
          "Department" = dept,
          "College" = college)
  
-print(percent_23_24)
 # gtsave(percent_23_24, "percent_23_24")
 
 
@@ -365,7 +412,6 @@ percent_ls <- percent_23_24 %>%
   select(Department, `Percentage of A's`) |>
   as.data.frame()
 
-
 percent_ls1 <- percent_ls[1:20,]
 
 percent_ls2 <- percent_ls[21:40,]
@@ -374,170 +420,30 @@ percent_ls2 <- percent_ls[21:40,]
 # Rename to remove duplicate names ----------------------------------------
 
 percent_ls_full <- data.frame(percent_ls1, percent_ls2)
+
 names(percent_ls_full) <- c("a", "b", "aa", "bb")
 
 # Generate Table & Relabel----------------------------------------------------------
 
 percent_ls_full_pretty <- percent_ls_full |>
-  gt() |>
+  gt()|>
   tab_header(title = md("Percentage of A's in 2023-2024"),
              subtitle = md("Data from Fall 2023 to Spring 2024")) |>
   cols_label(a = "Department",
              b = "Percentage of A's",
              aa = "Department",
              bb = "Percentage of A's")|>
-  tab_spanner(label = md("College of Letters & Science"), columns = c(a, b,aa,bb))
-percent_ls_full_pretty
+  tab_spanner(label = md("College of Letters & Science"), 
+              columns = c(a, b, aa, bb))|>
+  tab_options(heading.title.font.size = 17, heading.subtitle.font.size = 14, table.font.size = 14,
+              table.border.top.color = "white")
+percent_ls_full_pretty 
 
 percent_rest <- percent_23_24 |> 
   filter(College != "College of Letters & Science") |>
-  as.data.frame()|>
-  gt(groupname_col = "College", row_group_as_column = TRUE)
-  
-  
+  gt(groupname_col = "College", row_group_as_column = TRUE)|>
+  opt_row_striping(row_striping = TRUE)|>
+  tab_options(row.striping.include_stub = FALSE, table.font.size = 14)
+
 percent_rest
-
-percent_full <- gt_group(percent_ls_full_pretty, percent_rest)
-
-percent_full
-# college_avg_plot <- college_avg_grade %>%
-#   # filtering out interdisciplinary/interdepartmental courses
-#   # filtering out college of creative studies because they do not have letter grades
-#   filter(!is.na(college), college != "College of Creative Studies") %>%
-#   ggplot(aes(x = academic_year, y = college_GPA, group = college)) +
-#   geom_point(aes(colour = college))+
-#   geom_line(aes(colour = college))+
-#   labs(title = "Average GPA by Academic Year for UCSB Colleges",
-#        x = "Academic Year",
-#        y = "Grade Point Average (GPA)",
-#        colour = "College") +
-#   theme_minimal()+
-#   theme(axis.text.x = element_text(angle = 45))
-# 
-# print(college_avg_plot)
-# 
-# ggsave('college_avg_plot.png')
-#   
-#             
-# college_A_plot <- college_avg_grade %>%
-#   # filtering out interdisciplinary/interdepartmental courses
-#   # filtering out college of creative studies because they do not have letter grades
-#   filter(!is.na(college), college != "College of Creative Studies") %>% 
-#   ggplot(aes(x = academic_year, y = college_percent_A, group = college)) +
-#   geom_point(aes(colour = college))+
-#   geom_line(aes(colour = college))+
-#   labs(title = "Percentage of A's by Academic Year for UCSB Colleges",
-#        x = "Academic Year",
-#        y = "Percentage of A's",
-#        colour = "College") +
-#   theme_minimal()+
-#   theme(axis.text.x = element_text(angle = 45))
-# 
-# 
-# print(college_A_plot)
-# ggsave('college_A_plot.png')
-# 
-# 
-# 
-# division_avg_plot <- division_avg_grade %>%
-#   # filtering to not include Creative Studies and Engineering because they are not part of Letters & Science
-#   filter(division != "College of Creative Studies" & division != "Engineering" & division != "Interdisciplinary") %>% 
-#   ggplot(aes(x = academic_year, y = division_GPA, group = division)) +
-#   geom_point(aes(colour = division))+
-#   geom_line(aes(colour = division))+
-#   labs(title = "Average GPA by Division of College of Letters & Science",
-#        x = "Academic Year",
-#        y = "Grade Point Average (GPA)",
-#        colour = "Letters & Science Division") +
-#   theme_minimal()+
-#   theme(axis.text.x = element_text(angle = 45))
-#   
-# 
-# print(division_avg_plot)
-# ggsave('division_avg_plot.png')
-# 
-# division_A_plot <- division_avg_grade %>%
-#   # filtering to not include Creative Studies and Engineering because they are not part of Letters & Science
-#   filter(division != "Creative Studies" & division != "Engineering" & division != "Interdisciplinary") %>%
-#   ggplot(aes(x = academic_year, y = division_percent_A, group = division)) +
-#   geom_point(aes(colour = division))+
-#   geom_line(aes(colour = division))+
-#   labs(title = "Percentage of A's by Divisions of College of Letters & Science",
-#        x = "Academic Year",
-#        y = "Percentage of A's",
-#        colour = "Letters & Science Division")+
-#   theme_minimal()+
-#   theme(axis.text.x = element_text(angle = 45))
-# 
-#   
-# print(division_A_plot)
-# ggsave('division_A_plot.png')
-#   
-
-# average grade each year for econ department weighted by class size
-econ_avg_grade <- cleaned_course_grades %>%
-  filter(dept == "ECON") %>%
-  # find average GPA, percent of As, and total number of students enrolled for a course offered
-  # by multiple instructors/quarters in an academic year
-  summarize(course_avgGPA = weighted.mean(avgGPA, w = total_students, na.rm = T),
-            course_As = sum(total_As, na.rm = T),
-            yearly_course_enrollment = sum(total_students, na.rm = T),
-            .by = c(academic_year, course, course_level)) %>% 
-  # find average GPA and percent As for Econ department per year
-  summarize(dept_avgGPA = weighted.mean(course_avgGPA, w = yearly_course_enrollment, na.rm = T),
-            dept_course_enrollment = sum(yearly_course_enrollment, na.rm = T),
-            dept_percent_A = sum(course_As, na.rm = T) / dept_course_enrollment,
-        .by = c(academic_year, course_level))
-
-econ_avg_plot <- econ_avg_grade %>%
-  ggplot(aes(x = academic_year, y = dept_avgGPA, group = course_level)) +
-  geom_point(aes(colour = course_level))+
-  geom_line(aes(colour = course_level))+
-  labs(title = "Average Course GPA by Academic Year for UCSB Economics Department",
-       x = "Academic Year",
-       y = "Course GPA",
-       colour = "Course Level") +
-  theme_minimal()+
-  theme(axis.text.x = element_text(angle = 45))
-
-print(econ_avg_plot)
-ggsave('econ_avg_plot.png')
-
-econ_A_plot <- econ_avg_grade %>%
-  ggplot(aes(x = academic_year, y = dept_percent_A, group = course_level)) +
-  geom_point(aes(colour = course_level))+
-  geom_line(aes(colour = course_level))+
-  labs(title = "Percentage of A's by Academic Year for UCSB Economics Department",
-       x = "Academic Year",
-       y = "Percentage of A's",
-       colour = "Course Level") +
-  theme_minimal()+
-  theme(axis.text.x = element_text(angle = 45))
-
-print(econ_A_plot)
-ggsave('econ_A_plot.png')
-
-
-# write report on average gpa and percent of A’s for colleges and divisions
-# 
-# fix graduate classes for clinical psychology to be in social sciences
-# 
-# include two graphs (average gpa and percent of As)
-# 
-# and one table (percent of a’s for each department in the most recent year)
-# 
-# look at percent of A’s in econ 10a and econ 5 (prereqs for transfers) and see if lower division gpa requirement has changed over time
-# 
-
-# average grade by year for online vs in-person class
-
-
-# course grade percent by academic year
-
-  # summarize(percent_A = sum(total_As, na.rm = T) / sum(nLetterStudents, na.rm = T),
-  #           avg_GPA = mean(avgGPA, na.rm = T),
-  #           .by = c("academic_year", "course","dept", "course_level")) %>%
-  # summarize(percent_A = mean(percent_A, na.rm = T),
-  #           avg_GPA = mean(avg_GPA, na.rm = T),
-  #           .by = c("academic_year", "course_level"))
-
+```
